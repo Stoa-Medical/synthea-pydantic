@@ -1,3 +1,10 @@
+# AI stuff
+.specstory/
+.cursor*
+.claude/
+CLAUDE.md
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -172,3 +179,5 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+# SpecStory explanation file
+.specstory/.what-is-this.md

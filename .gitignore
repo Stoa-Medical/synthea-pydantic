@@ -1,4 +1,6 @@
 # AI stuff
+.aidigestignore
+codebase.md
 .specstory/
 .cursor*
 .claude/

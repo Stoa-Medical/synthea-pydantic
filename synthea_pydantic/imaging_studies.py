@@ -4,24 +4,35 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
 class ImagingStudy(BaseModel):
     """Model representing a single imaging study record from Synthea CSV output."""
     
-    model_config = ConfigDict(str_strip_whitespace=True)
+    model_config = ConfigDict(
+        str_strip_whitespace=True,
+        populate_by_name=True,  # Accept both field name and alias
+    )
     
-    id: UUID = Field(description="Non-unique identifier of the imaging study. An imaging study may have multiple rows.")
-    date: datetime = Field(description="The date and time the imaging study was conducted")
-    patient: UUID = Field(description="Foreign key to the Patient")
-    encounter: UUID = Field(description="Foreign key to the Encounter")
-    series_uid: str = Field(description="Imaging Study series DICOM UID.")
-    bodysite_code: str = Field(description="A SNOMED Body Structures code describing what part of the body the images in the series were taken of.")
-    bodysite_description: str = Field(description="Description of the body site")
-    modality_code: Literal["DX", "MR", "CT", "US", "NM", "PT"] = Field(description="A DICOM-DCM code describing the method used to take the images.")
-    modality_description: str = Field(description="Description of the image modality")
-    instance_uid: str = Field(description="Imaging Study instance DICOM UID.")
-    sop_code: str = Field(description="A DICOM-SOP code describing the Subject-Object Pair (SOP) that constitutes the image.")
-    sop_description: str = Field(description="Description of the SOP code")
-    procedure_code: str = Field(description="Imaging Procedure code from SNOMED-CT")
+    id: UUID = Field(alias='Id', description="Non-unique identifier of the imaging study. An imaging study may have multiple rows.")
+    date: datetime = Field(alias='DATE', description="The date and time the imaging study was conducted")
+    patient: UUID = Field(alias='PATIENT', description="Foreign key to the Patient")
+    encounter: UUID = Field(alias='ENCOUNTER', description="Foreign key to the Encounter")
+    series_uid: str = Field(alias='SERIES_UID', description="Imaging Study series DICOM UID.")
+    bodysite_code: str = Field(alias='BODYSITE_CODE', description="A SNOMED Body Structures code describing what part of the body the images in the series were taken of.")
+    bodysite_description: str = Field(alias='BODYSITE_DESCRIPTION', description="Description of the body site")
+    modality_code: str = Field(alias='MODALITY_CODE', description="A DICOM-DCM code describing the method used to take the images.")
+    modality_description: str = Field(alias='MODALITY_DESCRIPTION', description="Description of the image modality")
+    instance_uid: str = Field(alias='INSTANCE_UID', description="Imaging Study instance DICOM UID.")
+    sop_code: str = Field(alias='SOP_CODE', description="A DICOM-SOP code describing the Subject-Object Pair (SOP) that constitutes the image.")
+    sop_description: str = Field(alias='SOP_DESCRIPTION', description="Description of the SOP code")
+    procedure_code: str = Field(alias='PROCEDURE_CODE', description="Imaging Procedure code from SNOMED-CT")
+    
+    @model_validator(mode='before')
+    @classmethod
+    def preprocess_csv(cls, data):
+        """Convert empty strings to None for proper optional field handling."""
+        if isinstance(data, dict):
+            return {k: v if v != '' else None for k, v in data.items()}
+        return data

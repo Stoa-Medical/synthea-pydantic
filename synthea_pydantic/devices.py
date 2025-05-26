@@ -16,6 +16,6 @@ class Device(BaseModel):
     stop: Optional[datetime] = Field(None, description="The date and time the device was removed, if applicable")
     patient: UUID = Field(description="Foreign key to the Patient")
     encounter: UUID = Field(description="Foreign key to the Encounter when the device was associated")
-    code: str = Field(description="Type of device from SNOMED-CT")
+    code: str = Field(description="Type of device, from SNOMED-CT")
     description: str = Field(description="Description of the device")
-    udi: Optional[str] = Field(None, description="Unique Device Identifier for the device")
+    udi: str = Field(description="Unique Device Identifier for the device")

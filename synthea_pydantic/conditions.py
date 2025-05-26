@@ -16,5 +16,6 @@ class Condition(BaseModel):
     stop: Optional[date] = Field(None, description="The date the condition resolved, if applicable")
     patient: UUID = Field(description="Foreign key to the Patient")
     encounter: UUID = Field(description="Foreign key to the Encounter when the condition was diagnosed")
-    code: str = Field(description="Condition code from SNOMED-CT")
+    system: str = Field(description="Specifies the code system, typically SNOMED")
+    code: str = Field(description="Diagnosis code from SNOMED-CT")
     description: str = Field(description="Description of the condition")

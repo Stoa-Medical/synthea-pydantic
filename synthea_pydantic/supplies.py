@@ -1,8 +1,6 @@
 """Pydantic models for Synthea supplies CSV format."""
 
-from datetime import date
-from decimal import Decimal
-from typing import Optional
+from datetime import date as Date
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -13,9 +11,9 @@ class Supply(BaseModel):
     
     model_config = ConfigDict(str_strip_whitespace=True)
     
-    date: date = Field(description="The date the supply was used")
+    date: Date = Field(description="The date the supplies were used")
     patient: UUID = Field(description="Foreign key to the Patient")
-    encounter: UUID = Field(description="Foreign key to the Encounter when the supply was used")
-    code: str = Field(description="Supply code from SNOMED-CT")
-    description: str = Field(description="Description of the supply")
+    encounter: UUID = Field(description="Foreign key to the Encounter when the supplies were used")
+    code: str = Field(description="Code for the type of supply used, from SNOMED-CT")
+    description: str = Field(description="Description of supply used")
     quantity: int = Field(description="Quantity of supply used")

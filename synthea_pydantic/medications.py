@@ -14,7 +14,7 @@ class Medication(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
     
     start: datetime = Field(description="The date and time the medication was prescribed")
-    stop: Optional[datetime] = Field(None, description="The date and time the medication was stopped, if applicable")
+    stop: Optional[datetime] = Field(None, description="The date and time the prescription ended, if applicable")
     patient: UUID = Field(description="Foreign key to the Patient")
     payer: UUID = Field(description="Foreign key to the Payer")
     encounter: UUID = Field(description="Foreign key to the Encounter where the medication was prescribed")
@@ -24,5 +24,5 @@ class Medication(BaseModel):
     payer_coverage: Decimal = Field(description="The amount covered or reimbursed by the Payer")
     dispenses: int = Field(description="The number of times the prescription was filled")
     totalcost: Decimal = Field(description="The total cost of the prescription, including all dispenses")
-    reasoncode: Optional[str] = Field(None, description="The SNOMED-CT code specifying the reason the medication was prescribed, if applicable")
+    reasoncode: Optional[str] = Field(None, description="Diagnosis code from SNOMED-CT specifying why this medication was prescribed")
     reasondescription: Optional[str] = Field(None, description="Description of the reason code")

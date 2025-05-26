@@ -1,0 +1,17 @@
+[project]
+name = "synthea-pydantic"
+version = "0.1.0"
+description = "Lightweight pydantic wrappers for Synthea CSV format"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "mypy>=1.0",
+    "ruff",
+]

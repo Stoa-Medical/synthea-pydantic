@@ -18,23 +18,7 @@ def test_load_allergies_csv():
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            allergy = Allergy(
-                start=row['START'],
-                stop=row['STOP'] if row['STOP'] else None,
-                patient=row['PATIENT'],
-                encounter=row['ENCOUNTER'],
-                code=row['CODE'],
-                system=row['SYSTEM'],
-                description=row['DESCRIPTION'],
-                type=row['TYPE'] if row['TYPE'] else None,
-                category=row['CATEGORY'] if row['CATEGORY'] else None,
-                reaction1=row['REACTION1'] if row['REACTION1'] else None,
-                description1=row['DESCRIPTION1'] if row['DESCRIPTION1'] else None,
-                severity1=row['SEVERITY1'] if row['SEVERITY1'] else None,
-                reaction2=row['REACTION2'] if row['REACTION2'] else None,
-                description2=row['DESCRIPTION2'] if row['DESCRIPTION2'] else None,
-                severity2=row['SEVERITY2'] if row['SEVERITY2'] else None,
-            )
+            allergy = Allergy(**row)
             allergies.append(allergy)
     
     # Verify we loaded some data
@@ -67,23 +51,7 @@ def test_allergy_serialization():
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
         for row in reader:
-            allergy = Allergy(
-                start=row['START'],
-                stop=row['STOP'] if row['STOP'] else None,
-                patient=row['PATIENT'],
-                encounter=row['ENCOUNTER'],
-                code=row['CODE'],
-                system=row['SYSTEM'],
-                description=row['DESCRIPTION'],
-                type=row['TYPE'] if row['TYPE'] else None,
-                category=row['CATEGORY'] if row['CATEGORY'] else None,
-                reaction1=row['REACTION1'] if row['REACTION1'] else None,
-                description1=row['DESCRIPTION1'] if row['DESCRIPTION1'] else None,
-                severity1=row['SEVERITY1'] if row['SEVERITY1'] else None,
-                reaction2=row['REACTION2'] if row['REACTION2'] else None,
-                description2=row['DESCRIPTION2'] if row['DESCRIPTION2'] else None,
-                severity2=row['SEVERITY2'] if row['SEVERITY2'] else None,
-            )
+            allergy = Allergy(**row)
             allergies.append(allergy)
     
     # Test model_dump() for all allergies
@@ -113,7 +81,7 @@ def test_allergy_serialization():
 
 def test_allergy_field_validation():
     """Test field validation for Allergy model."""
-    # Test with minimal required fields
+    # Test with minimal required fields using lowercase names
     allergy = Allergy(
         start='2020-01-01',
         patient='b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85',
@@ -150,3 +118,54 @@ def test_allergy_field_validation():
     assert allergy_full.category == 'medication'
     assert allergy_full.severity1 == 'SEVERE'
     assert allergy_full.severity2 == 'MILD'
+
+
+def test_csv_direct_loading():
+    """Test that CSV rows can be loaded directly with Allergy(**row)."""
+    csv_path = Path(__file__).parent / "data" / "csv" / "allergies.csv"
+    
+    with open(csv_path, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
+        row = next(reader)
+        
+        # This should work directly now
+        allergy = Allergy(**row)
+        
+        # Verify it loaded correctly
+        assert allergy.start == date(2020, 2, 17)
+        assert allergy.patient == UUID('b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85')
+        assert allergy.code == '111088007'
+
+
+def test_empty_string_handling():
+    """Test that empty strings in CSV are converted to None."""
+    # Simulate a CSV row with empty strings
+    csv_row = {
+        'START': '2020-01-01',
+        'STOP': '',  # Empty string should become None
+        'PATIENT': 'b9c610cd-28a6-4636-ccb6-c7a0d2a4cb85',
+        'ENCOUNTER': '01efcc52-15d6-51e9-faa2-bee069fcbe44',
+        'CODE': '123456',
+        'SYSTEM': 'SNOMED-CT',
+        'DESCRIPTION': 'Test allergy',
+        'TYPE': '',  # Empty string should become None
+        'CATEGORY': '',  # Empty string should become None
+        'REACTION1': '',  # Empty string should become None
+        'DESCRIPTION1': '',  # Empty string should become None
+        'SEVERITY1': '',  # Empty string should become None
+        'REACTION2': '',  # Empty string should become None
+        'DESCRIPTION2': '',  # Empty string should become None
+        'SEVERITY2': '',  # Empty string should become None
+    }
+    
+    allergy = Allergy(**csv_row)
+    
+    assert allergy.stop is None
+    assert allergy.type is None
+    assert allergy.category is None
+    assert allergy.reaction1 is None
+    assert allergy.description1 is None
+    assert allergy.severity1 is None
+    assert allergy.reaction2 is None
+    assert allergy.description2 is None
+    assert allergy.severity2 is None

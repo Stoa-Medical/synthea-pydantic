@@ -7,6 +7,7 @@ synthea-pydantic/
   ...
   tests/
     data/
+      README.txt
       csv/
         allergies.csv
         careplans.csv

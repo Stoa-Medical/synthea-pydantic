@@ -4,6 +4,11 @@
 .claude/
 CLAUDE.md
 
+# Mac stuff
+.DS_Store
+
+# Test data
+tests/data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

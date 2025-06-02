@@ -1,19 +1,16 @@
 """Pydantic models for Synthea observations CSV format."""
 
 from datetime import datetime
-from typing import Literal, Optional, Union
+from typing import Optional, Union
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import Field, model_validator
+
+from .base import SyntheaBaseModel
 
 
-class Observation(BaseModel):
+class Observation(SyntheaBaseModel):
     """Model representing a single observation record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     date: datetime = Field(alias='DATE', description="The date and time the observation was performed")
     patient: UUID = Field(alias='PATIENT', description="Foreign key to the Patient")
@@ -28,20 +25,17 @@ class Observation(BaseModel):
     @model_validator(mode='before')
     @classmethod
     def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
+        """Convert empty strings to None and handle numeric values."""
+        # First apply the base preprocessing
+        data = super().preprocess_csv(data)
+        
         if isinstance(data, dict):
-            processed = {}
-            for k, v in data.items():
-                # Convert empty strings to None
-                if v == '':
-                    processed[k] = None
-                # Try to convert numeric values in VALUE field when TYPE is numeric
-                elif k == 'VALUE' and data.get('TYPE') == 'numeric' and v:
-                    try:
-                        processed[k] = float(v)
-                    except ValueError:
-                        processed[k] = v
-                else:
-                    processed[k] = v
+            processed = data.copy()
+            # Try to convert numeric values in VALUE field when TYPE is numeric
+            if processed.get('TYPE') == 'numeric' and processed.get('VALUE'):
+                try:
+                    processed['VALUE'] = float(processed['VALUE'])
+                except ValueError:
+                    pass  # Keep original value if conversion fails
             return processed
         return data

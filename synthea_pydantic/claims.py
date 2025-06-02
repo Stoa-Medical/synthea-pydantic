@@ -5,16 +5,13 @@ from decimal import Decimal
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import Field, model_validator
+
+from .base import SyntheaBaseModel
 
 
-class Claim(BaseModel):
+class Claim(SyntheaBaseModel):
     """Model representing a single claim record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='Id', description="Primary Key. Unique Identifier of the claim")
     patientid: UUID = Field(alias='PATIENTID', description="Foreign key to the Patient")
@@ -47,19 +44,20 @@ class Claim(BaseModel):
     lastbilleddatep: Optional[datetime] = Field(None, alias='LASTBILLEDDATEP', description="Date the claim was sent to the Patient")
     healthcareclaimtypeid1: Optional[Literal[1, 2]] = Field(None, alias='HEALTHCARECLAIMTYPEID1', description="Type of claim: 1 is professional, 2 is institutional")
     healthcareclaimtypeid2: Optional[Literal[1, 2]] = Field(None, alias='HEALTHCARECLAIMTYPEID2', description="Type of claim: 1 is professional, 2 is institutional")
+    healthcareclaimtypeidp: Optional[str] = Field(None, alias='HEALTHCARECLAIMTYPEIDP', description="Healthcare claim type ID for patient")
     
     @model_validator(mode='before')
     @classmethod
     def preprocess_csv(cls, data):
         """Convert empty strings to None and handle special values."""
+        # First apply the base preprocessing
+        data = super().preprocess_csv(data)
+        
         if isinstance(data, dict):
-            processed = {}
+            processed = data.copy()
             for k, v in data.items():
-                # Convert empty strings to None
-                if v == '':
-                    processed[k] = None
                 # Handle '0' as None for UUID fields that use '0' as a null value
-                elif k in ['SECONDARYPATIENTINSURANCEID', 'PRIMARYPATIENTINSURANCEID'] and v == '0':
+                if k in ['SECONDARYPATIENTINSURANCEID', 'PRIMARYPATIENTINSURANCEID'] and v == '0':
                     processed[k] = None
                 # Handle '0' as None for claim type IDs
                 elif k in ['HEALTHCARECLAIMTYPEID1', 'HEALTHCARECLAIMTYPEID2'] and v == '0':
@@ -70,7 +68,5 @@ class Claim(BaseModel):
                         processed[k] = int(v)
                     except ValueError:
                         processed[k] = v
-                else:
-                    processed[k] = v
             return processed
         return data

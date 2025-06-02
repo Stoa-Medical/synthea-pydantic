@@ -4,16 +4,13 @@ from datetime import date
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field
+
+from .base import SyntheaBaseModel
 
 
-class Allergy(BaseModel):
+class Allergy(SyntheaBaseModel):
     """Model representing a single allergy record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     start: date = Field(alias='START', description="The date the allergy was diagnosed")
     stop: Optional[date] = Field(None, alias='STOP', description="The date the allergy ended, if applicable")
@@ -30,11 +27,3 @@ class Allergy(BaseModel):
     reaction2: Optional[str] = Field(None, alias='REACTION2', description="Optional SNOMED code of the patients second reaction")
     description2: Optional[str] = Field(None, alias='DESCRIPTION2', description="Optional description of the Reaction2 SNOMED code")
     severity2: Optional[Literal["MILD", "MODERATE", "SEVERE"]] = Field(None, alias='SEVERITY2', description="Severity of the second reaction")
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data

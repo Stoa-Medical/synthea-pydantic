@@ -5,7 +5,6 @@ from datetime import datetime
 from pathlib import Path
 from uuid import UUID
 
-import pytest
 
 from synthea_pydantic.observations import Observation
 

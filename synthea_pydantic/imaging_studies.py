@@ -1,19 +1,16 @@
 """Pydantic models for Synthea imaging_studies CSV format."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field
+
+from .base import SyntheaBaseModel
 
 
-class ImagingStudy(BaseModel):
+class ImagingStudy(SyntheaBaseModel):
     """Model representing a single imaging study record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='Id', description="Non-unique identifier of the imaging study. An imaging study may have multiple rows.")
     date: datetime = Field(alias='DATE', description="The date and time the imaging study was conducted")
@@ -28,11 +25,5 @@ class ImagingStudy(BaseModel):
     sop_code: str = Field(alias='SOP_CODE', description="A DICOM-SOP code describing the Subject-Object Pair (SOP) that constitutes the image.")
     sop_description: str = Field(alias='SOP_DESCRIPTION', description="Description of the SOP code")
     procedure_code: str = Field(alias='PROCEDURE_CODE', description="Imaging Procedure code from SNOMED-CT")
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data
+    instance_number: Optional[int] = Field(None, alias='INSTANCE_NUMBER', description="Number of the instance within the series")
+    description: Optional[str] = Field(None, alias='DESCRIPTION', description="Description of the imaging study")

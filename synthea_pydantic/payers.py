@@ -4,16 +4,13 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field
+
+from .base import SyntheaBaseModel
 
 
-class Payer(BaseModel):
+class Payer(SyntheaBaseModel):
     """Model representing a single payer record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='Id', description="Primary Key")
     name: str = Field(alias='NAME', description="Name of the payer")
@@ -36,11 +33,3 @@ class Payer(BaseModel):
     unique_customers: int = Field(alias='UNIQUE_CUSTOMERS', description="Number of unique patients enrolled with the Payer")
     qols_avg: float = Field(alias='QOLS_AVG', description="Average patient's Quality of Life scores for those enrolled in the Payer during the entire simulation")
     member_months: int = Field(alias='MEMBER_MONTHS', description="The total number of months that patients were enrolled with this Payer during the simulation and paid monthly premiums (if any)")
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data

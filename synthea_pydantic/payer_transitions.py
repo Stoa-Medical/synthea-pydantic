@@ -4,16 +4,13 @@ from datetime import datetime
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+from pydantic import Field, field_validator
+
+from .base import SyntheaBaseModel
 
 
-class PayerTransition(BaseModel):
+class PayerTransition(SyntheaBaseModel):
     """Model representing a single payer transition record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     patient: UUID = Field(alias='PATIENT', description="Foreign key to the Patient")
     memberid: Optional[UUID] = Field(None, alias='MEMBERID', description="Member ID for the Insurance Plan")
@@ -28,10 +25,14 @@ class PayerTransition(BaseModel):
     @classmethod
     def parse_year_from_datetime(cls, v):
         """Extract year from datetime string if needed."""
-        if isinstance(v, str) and 'T' in v:
-            # Parse datetime string and extract year
-            dt = datetime.fromisoformat(v.replace('Z', '+00:00'))
-            return dt.year
+        if isinstance(v, str):
+            if 'T' in v:
+                # Parse full datetime string and extract year
+                dt = datetime.fromisoformat(v.replace('Z', '+00:00'))
+                return dt.year
+            elif '-' in v and len(v) >= 4:
+                # Handle YYYY-MM-DD format - extract just the year part
+                return int(v.split('-')[0])
         return v
     
     @field_validator('ownership', mode='before')
@@ -41,11 +42,3 @@ class PayerTransition(BaseModel):
         if isinstance(v, str):
             return v.strip()
         return v
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data

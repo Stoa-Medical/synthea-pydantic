@@ -3,16 +3,13 @@
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field
+
+from .base import SyntheaBaseModel
 
 
-class Provider(BaseModel):
+class Provider(SyntheaBaseModel):
     """Model representing a single provider record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='Id', description="Primary key of the Provider/Clinician")
     organization: UUID = Field(alias='ORGANIZATION', description="Foreign key to the Organization that employees this provider")
@@ -26,11 +23,3 @@ class Provider(BaseModel):
     lat: Optional[float] = Field(None, alias='LAT', description="Latitude of Provider's address")
     lon: Optional[float] = Field(None, alias='LON', description="Longitude of Provider's address")
     utilization: int = Field(alias='UTILIZATION', description="The number of encounters/procedures performed by this provider")
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data

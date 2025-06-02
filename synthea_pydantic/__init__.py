@@ -3,6 +3,7 @@
 __version__ = "0.1.0"
 
 from .allergies import Allergy
+from .base import SyntheaBaseModel
 from .careplans import CarePlan
 from .claims import Claim
 from .claims_transactions import ClaimTransaction
@@ -23,6 +24,7 @@ from .supplies import Supply
 
 __all__ = [
     "Allergy",
+    "SyntheaBaseModel",
     "CarePlan",
     "Claim",
     "ClaimTransaction",

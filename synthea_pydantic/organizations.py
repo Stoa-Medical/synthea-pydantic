@@ -4,16 +4,13 @@ from decimal import Decimal
 from typing import Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field
+
+from .base import SyntheaBaseModel
 
 
-class Organization(BaseModel):
+class Organization(SyntheaBaseModel):
     """Model representing a single organization record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='Id', description="Primary key of the Organization")
     name: str = Field(alias='NAME', description="Name of the Organization")
@@ -26,11 +23,3 @@ class Organization(BaseModel):
     phone: Optional[str] = Field(None, alias='PHONE', description="Organization's phone number. Sometimes multiple numbers")
     revenue: Decimal = Field(alias='REVENUE', description="The monetary revenue of the organization during the entire simulation")
     utilization: int = Field(alias='UTILIZATION', description="The number of Encounters performed by this Organization")
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data

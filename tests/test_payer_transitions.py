@@ -4,7 +4,6 @@ import csv
 from pathlib import Path
 from uuid import UUID
 
-import pytest
 
 from synthea_pydantic.payer_transitions import PayerTransition
 

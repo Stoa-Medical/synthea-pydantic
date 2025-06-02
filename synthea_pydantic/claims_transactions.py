@@ -5,16 +5,13 @@ from decimal import Decimal
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field, model_validator
+
+from .base import SyntheaBaseModel
 
 
-class ClaimTransaction(BaseModel):
+class ClaimTransaction(SyntheaBaseModel):
     """Model representing a single claim transaction record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='ID', description="Primary Key. Unique Identifier of the claim transaction")
     claimid: UUID = Field(alias='CLAIMID', description="Foreign key to the Claim")
@@ -69,14 +66,14 @@ class ClaimTransaction(BaseModel):
     @classmethod
     def preprocess_csv(cls, data):
         """Convert empty strings to None and handle special values."""
+        # First apply the base preprocessing
+        data = super().preprocess_csv(data)
+        
         if isinstance(data, dict):
-            processed = {}
+            processed = data.copy()
             for k, v in data.items():
-                # Convert empty strings to None
-                if v == '':
-                    processed[k] = None
                 # Handle '0' as None for UUID fields that use '0' as a null value
-                elif k in ['PATIENTINSURANCEID'] and v == '0':
+                if k in ['PATIENTINSURANCEID'] and v == '0':
                     processed[k] = None
                 # Convert string numbers to integers for diagnosis refs
                 elif k in ['DIAGNOSISREF1', 'DIAGNOSISREF2', 'DIAGNOSISREF3', 'DIAGNOSISREF4'] and v and v != '':
@@ -84,7 +81,5 @@ class ClaimTransaction(BaseModel):
                         processed[k] = int(v)
                     except ValueError:
                         processed[k] = v
-                else:
-                    processed[k] = v
             return processed
         return data

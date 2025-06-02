@@ -6,7 +6,6 @@ from decimal import Decimal
 from pathlib import Path
 from uuid import UUID
 
-import pytest
 
 from synthea_pydantic.claims_transactions import ClaimTransaction
 

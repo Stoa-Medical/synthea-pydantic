@@ -5,16 +5,13 @@ from decimal import Decimal
 from typing import Literal, Optional
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import Field
+
+from .base import SyntheaBaseModel
 
 
-class Patient(BaseModel):
+class Patient(SyntheaBaseModel):
     """Model representing a single patient record from Synthea CSV output."""
-    
-    model_config = ConfigDict(
-        str_strip_whitespace=True,
-        populate_by_name=True,  # Accept both field name and alias
-    )
     
     id: UUID = Field(alias='Id', description="Primary Key. Unique Identifier of the patient")
     birthdate: date = Field(alias='BIRTHDATE', description="The date the patient was born")
@@ -41,11 +38,3 @@ class Patient(BaseModel):
     lon: Optional[Decimal] = Field(None, alias='LON', description="Longitude of Patient's address")
     healthcare_expenses: Decimal = Field(alias='HEALTHCARE_EXPENSES', description="The total lifetime cost of healthcare to the patient (i.e. what the patient paid)")
     healthcare_coverage: Decimal = Field(alias='HEALTHCARE_COVERAGE', description="The total lifetime cost of healthcare services that were covered by Payers (i.e. what the insurance company paid)")
-    
-    @model_validator(mode='before')
-    @classmethod
-    def preprocess_csv(cls, data):
-        """Convert empty strings to None for proper optional field handling."""
-        if isinstance(data, dict):
-            return {k: v if v != '' else None for k, v in data.items()}
-        return data

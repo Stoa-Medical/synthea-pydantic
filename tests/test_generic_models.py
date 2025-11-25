@@ -7,48 +7,7 @@ from typing import Type
 import pytest
 from pydantic import BaseModel
 
-from synthea_pydantic import (
-    Allergy,
-    CarePlan,
-    Claim,
-    ClaimTransaction,
-    Condition,
-    Device,
-    Encounter,
-    ImagingStudy,
-    Immunization,
-    Medication,
-    Observation,
-    Organization,
-    Patient,
-    PayerTransition,
-    Payer,
-    Procedure,
-    Provider,
-    Supply,
-)
-
-# All models to test generically
-ALL_MODELS = [
-    (Allergy, "allergies"),
-    (CarePlan, "careplans"),
-    (Claim, "claims"),
-    (ClaimTransaction, "claims_transactions"),
-    (Condition, "conditions"),
-    (Device, "devices"),
-    (Encounter, "encounters"),
-    (ImagingStudy, "imaging_studies"),
-    (Immunization, "immunizations"),
-    (Medication, "medications"),
-    (Observation, "observations"),
-    (Organization, "organizations"),
-    (Patient, "patients"),
-    (PayerTransition, "payer_transitions"),
-    (Payer, "payers"),
-    (Procedure, "procedures"),
-    (Provider, "providers"),
-    (Supply, "supplies"),
-]
+from conftest import ALL_MODELS
 
 
 @pytest.mark.parametrize("model_class,csv_name", ALL_MODELS)

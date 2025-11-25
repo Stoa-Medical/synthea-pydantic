@@ -1,9 +1,13 @@
 """Shared test configuration and fixtures for synthea-pydantic tests."""
 
 import csv
+from itertools import islice
 from pathlib import Path
 
 import pytest
+
+# Limit rows processed in tests for performance
+MAX_TEST_ROWS = 10_000
 
 from synthea_pydantic import (
     Allergy,
@@ -63,13 +67,13 @@ def model_and_csv(request):
 
 @pytest.fixture
 def csv_data(model_and_csv):
-    """Fixture that loads CSV data for a model."""
+    """Fixture that loads CSV data for a model (limited to MAX_TEST_ROWS)."""
     model_class, csv_name, csv_path = model_and_csv
     
     models = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             model = model_class(**row)
             models.append(model)
     

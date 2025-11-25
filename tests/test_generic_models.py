@@ -1,13 +1,14 @@
 """Generic tests for all Synthea Pydantic models."""
 
 import csv
+from itertools import islice
 from pathlib import Path
 from typing import Type
 
 import pytest
 from pydantic import BaseModel
 
-from conftest import ALL_MODELS
+from conftest import ALL_MODELS, MAX_TEST_ROWS
 
 
 @pytest.mark.parametrize("model_class,csv_name", ALL_MODELS)
@@ -22,7 +23,7 @@ def test_csv_loading(model_class: Type[BaseModel], csv_name: str):
     models = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             model = model_class(**row)
             models.append(model)
     

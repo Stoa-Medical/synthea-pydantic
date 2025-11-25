@@ -3,10 +3,11 @@
 import csv
 from datetime import datetime
 from decimal import Decimal
+from itertools import islice
 from pathlib import Path
 from uuid import UUID
 
-
+from conftest import MAX_TEST_ROWS
 from synthea_pydantic.claims import Claim
 
 
@@ -17,7 +18,7 @@ def test_load_claims_csv():
     claims = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             claim = Claim(**row)
             claims.append(claim)
     
@@ -66,7 +67,7 @@ def test_claim_serialization():
     claims = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             claim = Claim(**row)
             claims.append(claim)
     

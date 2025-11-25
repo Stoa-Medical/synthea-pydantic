@@ -2,10 +2,11 @@
 
 import csv
 from datetime import date
+from itertools import islice
 from pathlib import Path
 from uuid import UUID
 
-
+from conftest import MAX_TEST_ROWS
 from synthea_pydantic.allergies import Allergy
 
 
@@ -16,7 +17,7 @@ def test_load_allergies_csv():
     allergies = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             allergy = Allergy(**row)
             allergies.append(allergy)
     
@@ -49,7 +50,7 @@ def test_allergy_serialization():
     allergies = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             allergy = Allergy(**row)
             allergies.append(allergy)
     

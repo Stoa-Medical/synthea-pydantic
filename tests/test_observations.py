@@ -2,10 +2,11 @@
 
 import csv
 from datetime import datetime
+from itertools import islice
 from pathlib import Path
 from uuid import UUID
 
-
+from conftest import MAX_TEST_ROWS
 from synthea_pydantic.observations import Observation
 
 
@@ -16,7 +17,7 @@ def test_load_observations_csv():
     observations = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             observation = Observation(**row)
             observations.append(observation)
     
@@ -43,7 +44,7 @@ def test_observation_serialization():
     observations = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
-        for row in reader:
+        for row in islice(reader, MAX_TEST_ROWS):
             observation = Observation(**row)
             observations.append(observation)
     

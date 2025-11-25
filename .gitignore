@@ -188,3 +188,6 @@ cython_debug/
 .pypirc
 # SpecStory explanation file
 .specstory/.what-is-this.md
+
+.pithy/
+.claude*

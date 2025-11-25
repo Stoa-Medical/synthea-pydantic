@@ -1,13 +1,17 @@
 """Base model for all Synthea CSV models."""
 
+import csv
 from decimal import Decimal
-from typing import Union, get_origin, get_args
+from pathlib import Path
+from typing import Iterator, TypeVar, Union, get_origin, get_args
 
 from pydantic import BaseModel, ConfigDict, model_validator, field_validator
 
 from typing_extensions import Literal
 
 from ._parsers import decimal_or_none
+
+T = TypeVar('T', bound='SyntheaBaseModel')
 
 
 class SyntheaBaseModel(BaseModel):
@@ -106,3 +110,30 @@ class SyntheaBaseModel(BaseModel):
             return decimal_or_none(value)
         
         return value
+    
+    @classmethod
+    def from_csv(cls: type[T], path: str | Path) -> list[T]:
+        """Load all records from a CSV file.
+        
+        Args:
+            path: Path to the CSV file
+            
+        Returns:
+            List of model instances
+        """
+        with open(path, newline='') as f:
+            return [cls(**row) for row in csv.DictReader(f)]
+    
+    @classmethod
+    def iter_csv(cls: type[T], path: str | Path) -> Iterator[T]:
+        """Iterate over records from a CSV file (memory-efficient).
+        
+        Args:
+            path: Path to the CSV file
+            
+        Yields:
+            Model instances one at a time
+        """
+        with open(path, newline='') as f:
+            for row in csv.DictReader(f):
+                yield cls(**row)
